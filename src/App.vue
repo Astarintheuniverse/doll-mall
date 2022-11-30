@@ -9,10 +9,25 @@
 
 export default {
   name: 'App',
-  components: {
-
+  components: {},
+  data(){
+    return {
+      user:JSON.parse(sessionStorage.getItem('CurUser')),
+    }
+},
+  watch:{
+    '$store.state.menu':{
+      handler(val,old) {
+        console.log(val,old)
+        if(!old && this.user &&this.user.username){
+          this.$store.commit("setMenu",val)
+        }
+      },
+      immediate:true
+    }
   }
 }
+
 </script>
 
 <style>

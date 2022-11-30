@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="margin-bottom: 5px;" align="center">
-      <el-input v-model="shopname" placeholder="请输商店名称" suffix-icon="el-icon-search" style="width: 200px;"
+      <el-input v-model="warningid" placeholder="警告Id" suffix-icon="el-icon-search" style="width: 200px;"
                 @keyup.enter.native="loadPost"></el-input>
       <el-button type="primary" style="margin-left: 5px;" @click="loadPost">查询</el-button>
       <el-button type="success" @click="resetParam">重置</el-button>
@@ -12,27 +12,18 @@
               :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
               border
     >
-      <el-table-column prop="shopid" label="商品id" width="60" align="center">
+      <el-table-column prop="warningid" label="警告id" width="160" align="center">
       </el-table-column>
-      <el-table-column prop="shopname" label="商店名称" width="180" align="center">
+      <el-table-column prop="warningname"  label="警告名字" width="160" align="center">
       </el-table-column>
-      <el-table-column prop="shopphoto"  label="商店头像" width="180" align="center">
-        <template slot-scope="{row}">
-          <img :src="row.shopphoto" style="width: 180px;height: 130px" align="center">
-        </template>
-      </el-table-column>
-      <el-table-column prop="shopdescribe"  label="商店描述" width="180" align="center">
-      </el-table-column>
-      <el-table-column prop="state"  label="商店状态" width="80" align="center">
-      </el-table-column>
-      <el-table-column prop="collectcontent"  label="商店收藏的人数" width="120" align="center">
+      <el-table-column prop="warningdescribe"  label="警告描述" width="360" align="center">
       </el-table-column>
       <el-table-column prop="operate" label="操作">
         <template slot-scope="scope">
           <el-button size="small" type="success" @click="mod(scope.row)">编辑</el-button>
           <el-popconfirm
               title="确定删除吗？"
-              @confirm="del(scope.row.shopid)"
+              @confirm="del(scope.row.warningid)"
               style="margin-left: 5px;"
           >
             <el-button slot="reference" size="small" type="danger" >删除</el-button>
@@ -40,6 +31,30 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <el-dialog
+        title="提示"
+        :visible.sync="centerDialogVisible"
+        width="30%"
+        center>
+      <!--      弹框的输入表单ref="form"映射form-->
+      <el-form ref="form" :rules="rules" :model="form" label-width="80px">
+        <el-form-item label="警告名称" prop="warningname">
+          <el-col :span="20">
+            <el-input v-model="form.warningname"></el-input>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="警告描述" prop="warningdescribe">
+          <el-col :span="20">
+            <el-input type="textarea" v-model="form.warningdescribe"></el-input>
+          </el-col>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="centerDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="save">确 定</el-button>
+  </span>
+    </el-dialog>
     <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -49,64 +64,45 @@
         layout="total, sizes, prev, pager, next, jumper"
         :total="total">
     </el-pagination>
-
-    <el-dialog
-        title="提示"
-        :visible.sync="centerDialogVisible"
-        width="30%"
-        center>
-
-      <el-form ref="form" :rules="rules" :model="form" label-width="80px">
-        <el-form-item label="商店名称" prop="name">
-          <el-col :span="20">
-            <el-input v-model="form.shopname"></el-input>
-          </el-col>
-        </el-form-item>
-        <el-form-item label="商店描述" prop="shopdescribe">
-          <el-col :span="20">
-            <el-input type="textarea" v-model="form.shopdescribe"></el-input>
-          </el-col>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.state">
-            <el-radio label="wait">wait</el-radio>
-            <el-radio label="gg">gg</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-    <el-button @click="centerDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="save">确 定</el-button>
-  </span>
-    </el-dialog>
   </div>
 </template>
 
 <script>
 export default {
-  name: "ShopManage",
-
+  name: "WarningManage",
   data() {
+    //效验id
+    let checkDuplicate =(rule,value,callback)=>{
+      if(this.form.warningid){
+        return callback();
+      }
+      this.$axios.get(this.$httpUrl+"/warning/findByWarningid?warningid="+this.form.warningid).then(res=>res.data).then(res=>{
+        if(res.code!=200){
+
+          callback()
+        }else{
+          callback(new Error('账号已经存在'));
+        }
+      })
+    };
     return {
       tableData: [],
       pageSize:10,
       pageNum:1,
       total:0,
-      shopid:'',
-      shopname:'',
-      shopphoto:'',
-      shopdescribe: '',
-      collectcontent:'',
-      state:'',
+      warningid:'',
+      warningname:'',
+      warningdescribe: '',
       centerDialogVisible:false,
       form:{
-        shopname:'',
-        shopdescribe: '',
-        state:'',
+        warningid:'',
+        warningname:'',
+        warningdescribe: '',
       },
       rules: {
-        shopname: [
-          {required: true, message: '请输商店名', trigger: 'blur'}
+        warningname: [
+          {required: true, message: '请输警告名称', trigger: 'blur'},
+          {validator:checkDuplicate,trigger: 'blur'}
         ]
       }
     }
@@ -115,12 +111,11 @@ export default {
     resetForm() {
       this.$refs.form.resetFields();
     },
-    del(shopid){
-      console.log(shopid)
-      this.$axios.get(this.$httpUrl+'/shop/del?shopid='+shopid).then(res=>res.data).then(res=>{
+    del(warningid){
+      console.log(warningid)
+      this.$axios.get(this.$httpUrl+'/warning/del?warningid='+warningid).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code==200){
-
           this.$message({
             message: '操作成功！',
             type: 'success'
@@ -139,29 +134,24 @@ export default {
       this.centerDialogVisible = true
       this.$nextTick(()=>{
         //赋值到表单
-        this.form.shopid = row.shopid
-        this.form.shopname = row.shopname
-        this.form.shopdescribe = row.shopdescribe
-        this.form.state = row.state
+        this.form.warningid = row.warningid
+        this.form.warningname = row.warningname
+        this.form.warningdescribe = row.warningdescribe
       })
     },
     add(){
-
       this.centerDialogVisible = true
       this.$nextTick(()=>{
         this.resetForm()
-        this.form.shopid =''
-        this.form.shopname =''
-        this.form.shopdescribe =''
-        this.form.state = ''
+        this.form.warningid = ''
+        this.form.warningname = ''
+        this.form.warningdescribe = ''
       })
-
     },
     doSave(){
-      this.$axios.post(this.$httpUrl+'/shop/save',this.form).then(res=>res.data).then(res=>{
+      this.$axios.post(this.$httpUrl+'/warning/save',this.form).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code==200){
-
           this.$message({
             message: '操作成功！',
             type: 'success'
@@ -179,7 +169,7 @@ export default {
       })
     },
     doMod(){
-      this.$axios.post(this.$httpUrl+'/shop/update',this.form).then(res=>res.data).then(res=>{
+      this.$axios.post(this.$httpUrl+'/warning/update',this.form).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code==200){
 
@@ -202,7 +192,7 @@ export default {
     save(){
       this.$refs.form.validate((valid) => {
         if (valid) {
-          if(this.form.shopid){
+          if(this.form.warningid){
             this.doMod();
           }else{
             this.doSave();
@@ -226,16 +216,16 @@ export default {
       this.loadPost()
     },
     resetParam(){
-      this.shopname=''
+      this.warningid=''
     },
     loadPost(){
-      this.$axios.post(this.$httpUrl+'/shop/listPage',{
+      this.$axios.post(this.$httpUrl+'/warning/listPage',{
         pageSize:this.pageSize,
         pageNum:this.pageNum,
         param:{
-          shopid:this.shopid,
-          shopname:this.shopname,
-          shopdescribe: this.shopdescribe
+          warningid:this.warningid,
+          warningname:this.warningname,
+          warningdescribe: this.warningdescribe
         }
       }).then(res=>res.data).then(res=>{
         console.log(res)
@@ -245,7 +235,6 @@ export default {
         }else{
           alert('获取数据失败')
         }
-
       })
     }
   },

@@ -29,7 +29,7 @@
       </el-table-column>
       <el-table-column prop="goodsid"  label="商品Id" width="120" align="center">
       </el-table-column>
-      <el-table-column prop="userid"  label="用户id" width="120" align="center">
+      <el-table-column prop="userid"  label="用户id" width="120" align="center"  >
       </el-table-column>
       <el-table-column prop="operate" label="操作">
         <template slot-scope="scope">
