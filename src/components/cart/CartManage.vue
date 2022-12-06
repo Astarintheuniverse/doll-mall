@@ -27,9 +27,13 @@
       </el-table-column>
       <el-table-column prop="totalprice"  label="总价" width="120" align="center">
       </el-table-column>
-      <el-table-column prop="goodsid"  label="商品名称" width="120" align="center">
+      <el-table-column prop="goodsid"  label="商品Id" width="120" align="center">
       </el-table-column>
-      <el-table-column prop="username"  label="用户名字" width="120" align="center"  >
+<<<<<<<<< Temporary merge branch 1
+      <el-table-column prop="userid"  label="用户id" width="120" align="center">
+=========
+      <el-table-column prop="userid"  label="用户id" width="120" align="center"  >
+>>>>>>>>> Temporary merge branch 2
       </el-table-column>
       <el-table-column prop="operate" label="操作">
         <template slot-scope="scope">
@@ -220,7 +224,7 @@ export default {
         pageSize:this.pageSize,
         pageNum:this.pageNum,
         param:{
-          userid:this.userid
+          cartid:this.cartid
         }
       }).then(res=>res.data).then(res=>{
         console.log(res)
