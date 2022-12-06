@@ -1,42 +1,27 @@
 <template>
   <div>
-    <div style="margin-bottom: 5px;" align="center">
-      <el-input v-model="cartid" placeholder="请输商店名称" suffix-icon="el-icon-search" style="width: 200px;"
+    <div style="margin-bottom: 5px;">
+      <el-input v-model="typename" placeholder="请输入商品分类名" suffix-icon="el-icon-search" style="width: 200px;"
                 @keyup.enter.native="loadPost"></el-input>
       <el-button type="primary" style="margin-left: 5px;" @click="loadPost">查询</el-button>
       <el-button type="success" @click="resetParam">重置</el-button>
-<!--
-      <el-button type="primary" style="margin-left: 5px;" @click="add">新增</el-button>-->
+
+      <el-button type="primary" style="margin-left: 5px;" @click="add">新增</el-button>
     </div>
     <el-table :data="tableData"
               :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
               border
     >
-      <el-table-column prop="cartid" label="购物车id" width="60" align="center">
+      <el-table-column prop="typeid" label="ID" width="60">
       </el-table-column>
-      <el-table-column prop="goodsdescribe1" label="商品的名字" width="180" align="center">
-      </el-table-column>
-      <el-table-column prop="goodsphoto1"  label="购物车的图片" width="180" align="center">
-        <template slot-scope="{row}">
-          <img :src="row.goodsphoto1" style="width: 180px;height: 130px">
-        </template>
-      </el-table-column>
-      <el-table-column prop="goodssize"  label="商品的尺寸" width="180" align="center">
-      </el-table-column>
-      <el-table-column prop="goodscount"  label="加入商品的数量" width="80" align="center">
-      </el-table-column>
-      <el-table-column prop="totalprice"  label="总价" width="120" align="center">
-      </el-table-column>
-      <el-table-column prop="goodsid"  label="商品名称" width="120" align="center">
-      </el-table-column>
-      <el-table-column prop="username"  label="用户名字" width="120" align="center"  >
+      <el-table-column prop="typename" label="分类名" width="180">
       </el-table-column>
       <el-table-column prop="operate" label="操作">
         <template slot-scope="scope">
           <el-button size="small" type="success" @click="mod(scope.row)">编辑</el-button>
           <el-popconfirm
               title="确定删除吗？"
-              @confirm="del(scope.row.cartid)"
+              @confirm="del(scope.row.typeid)"
               style="margin-left: 5px;"
           >
             <el-button slot="reference" size="small" type="danger" >删除</el-button>
@@ -61,14 +46,9 @@
         center>
 
       <el-form ref="form" :rules="rules" :model="form" label-width="80px">
-        <el-form-item label="购物车id" prop="name">
+        <el-form-item label="分类名" prop="typename">
           <el-col :span="20">
-            <el-input v-model="form.cartid"></el-input>
-          </el-col>
-        </el-form-item>
-        <el-form-item label="商品的名字" prop="goodsdescribe1">
-          <el-col :span="20">
-            <el-input type="textarea" v-model="form.goodsdescribe1"></el-input>
+            <el-input v-model="form.typename"></el-input>
           </el-col>
         </el-form-item>
       </el-form>
@@ -82,24 +62,22 @@
 
 <script>
 export default {
-  name: "CartManage",
+  name: "Goodstype",
   data() {
     return {
       tableData: [],
       pageSize:10,
       pageNum:1,
       total:0,
-      cartid:'',
-      goodsdescribe1:'',
-      goodsphoto1:'',
+      typename:'',
       centerDialogVisible:false,
       form:{
-        cartid:'',
-        goodsdescribe1:''
+        typeid:'',
+        typename:'',
       },
       rules: {
-        cartid: [
-          {required: true, message: '请输商店名', trigger: 'blur'}
+        name: [
+          {required: true, message: '请输入分类名', trigger: 'blur'}
         ]
       }
     }
@@ -108,9 +86,9 @@ export default {
     resetForm() {
       this.$refs.form.resetFields();
     },
-    del(cartid){
-      console.log(cartid)
-      this.$axios.get(this.$httpUrl+'/cart/del?cartid='+cartid).then(res=>res.data).then(res=>{
+    del(typeid){
+      console.log(typeid)
+      this.$axios.get(this.$httpUrl+'/goodstype/del?typeid='+typeid).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code==200){
 
@@ -132,8 +110,8 @@ export default {
       this.centerDialogVisible = true
       this.$nextTick(()=>{
         //赋值到表单
-        this.form.cartid = row.cartid
-        this.form.goodsdescribe1 = row.goodsdescribe1
+        this.form.typeid = row.typeid
+        this.form.typename = row.typename
       })
     },
     add(){
@@ -141,11 +119,12 @@ export default {
       this.centerDialogVisible = true
       this.$nextTick(()=>{
         this.resetForm()
+        this.typename= ''
       })
 
     },
     doSave(){
-      this.$axios.post(this.$httpUrl+'/cart/save',this.form).then(res=>res.data).then(res=>{
+      this.$axios.post(this.$httpUrl+'/goodstype/save',this.form).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code==200){
 
@@ -166,7 +145,7 @@ export default {
       })
     },
     doMod(){
-      this.$axios.post(this.$httpUrl+'/cart/update',this.form).then(res=>res.data).then(res=>{
+      this.$axios.post(this.$httpUrl+'/goodstype/update',this.form).then(res=>res.data).then(res=>{
         console.log(res)
         if(res.code==200){
 
@@ -189,7 +168,7 @@ export default {
     save(){
       this.$refs.form.validate((valid) => {
         if (valid) {
-          if(this.form.cartid){
+          if(this.form.typeid){
             this.doMod();
           }else{
             this.doSave();
@@ -213,14 +192,14 @@ export default {
       this.loadPost()
     },
     resetParam(){
-      this.cartid=''
+      this.typeid=''
     },
     loadPost(){
-      this.$axios.post(this.$httpUrl+'/cart/listPage',{
+      this.$axios.post(this.$httpUrl+'/goodstype/listPage',{
         pageSize:this.pageSize,
         pageNum:this.pageNum,
         param:{
-          userid:this.userid
+          typeid:this.typeid
         }
       }).then(res=>res.data).then(res=>{
         console.log(res)
